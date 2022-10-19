@@ -2,38 +2,23 @@ package question
 
 import (
 	"net/http"
-	"strings"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/trxbach/TOI-YEU-GO/helper"
 )
 
-func (wrp *Wrapper) InsertQuestionSql(statement string, answer string) error {
+func (wrp *Wrapper) insertQuestionSql(content string) (int, error) {
 	db := wrp.db
-	_, err := db.Exec("INSERT INTO questions (statement, answer) VALUES (?, ?)", statement, answer)
-	return err
+	res, err := db.Exec("INSERT INTO questions (content) VALUES (?)", content)
+	idq, err2 := res.LastInsertId()
+	helper.FatalOnErr(err2)
+	return int(idq), err
 }
 
 func (wrp *Wrapper) AddQuestion(c echo.Context) error {
-	statement := c.FormValue("statement")
-	answer := c.FormValue("answer")
-	err := wrp.InsertQuestionSql(statement, answer)
+	content := c.FormValue("content")
+	idq, err := wrp.insertQuestionSql(content)
 	helper.FatalOnErr(err)
-	return c.String(http.StatusOK, "Added statement = \""+statement+"\", answer = \""+answer+"\"\n")
-}
-
-func (wrp *Wrapper) AllQuestions(c echo.Context) error {
-	db := wrp.db
-	rows, err := db.Query("SELECT statement, answer FROM questions")
-	helper.FatalOnErr(err)
-	defer rows.Close()
-
-	var string_display strings.Builder
-	for rows.Next() {
-		var statement, answer string
-		err := rows.Scan(&statement, &answer)
-		helper.FatalOnErr(err)
-		string_display.WriteString("statement = \"" + statement + "\", answer = \"" + answer + "\"\n")
-	}
-	return c.String(http.StatusOK, string_display.String())
+	return c.String(http.StatusOK, "Added question, content = \"" + content + "\", idq = " + strconv.Itoa(idq) + "\n")
 }

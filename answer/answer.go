@@ -1,4 +1,4 @@
-package admin
+package answer
 
 import (
 	"github.com/labstack/echo/v4"
@@ -13,7 +13,5 @@ func New(e *echo.Echo, db *db.DB) {
 	wrp := &Wrapper{
 		db: db,
 	}
-	e.GET("/api/admin/delete_questions", wrp.DeleteAllQuestions)
-	e.GET("/api/admin/delete_answers", wrp.DeleteAllAnswers)
-	e.GET("/api/admin/all", wrp.AllQuestions)
+	e.POST("/api/answer/add", wrp.AddAnswer)
 }

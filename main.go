@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/trxbach/TOI-YEU-GO/admin"
+	"github.com/trxbach/TOI-YEU-GO/answer"
 	"github.com/trxbach/TOI-YEU-GO/db"
 	"github.com/trxbach/TOI-YEU-GO/general"
 	"github.com/trxbach/TOI-YEU-GO/helper"
@@ -30,6 +31,7 @@ func main() {
 	// e.POST("/api/auth/login")
 	admin.New(e, db)
 	question.New(e, db)
+	answer.New(e, db)
 
 	log.Fatal(e.Start(":1323"))
 }

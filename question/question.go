@@ -14,5 +14,4 @@ func New(e *echo.Echo, db *db.DB) {
 		db: db,
 	}
 	e.POST("/api/question/add", wrp.AddQuestion)
-	e.GET("/api/question/all", wrp.AllQuestions)
 }
