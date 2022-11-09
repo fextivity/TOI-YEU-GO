@@ -4,8 +4,17 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/trxbach/TOI-YEU-GO/database"
 	"github.com/trxbach/TOI-YEU-GO/helper"
 )
+
+func (wrp *Wrapper) ResetDatabase(c echo.Context) error {
+	err := database.ResetTables(wrp.db)
+	if err != nil {
+		return err
+	}
+	return c.String(http.StatusOK, "Reset database\n")
+}
 
 func (wrp *Wrapper) DeleteAllQuestions(c echo.Context) error {
 	db := wrp.db

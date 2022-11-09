@@ -1,4 +1,4 @@
-package question
+package test
 
 import (
 	"github.com/labstack/echo/v4"
@@ -13,5 +13,5 @@ func New(e *echo.Echo, db *database.DB) {
 	wrp := &Wrapper{
 		db: db,
 	}
-	e.POST("/api/question/add", wrp.AddQuestion)
+	e.POST("/api/test/add", wrp.AddTest)
 }
