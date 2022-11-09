@@ -1,5 +1,0 @@
-curl -X POST http://localhost:1323/api/question/add \
-  -H 'Content-Type: application/json' \
-  -d '{"content": "among?", "choices": [{"content": "ok"}, {"content": "us"}, {"content": "sus"}]}'
-
-curl -X 
