@@ -48,7 +48,7 @@ func loadDBConfig() *string {
 
 func CreateTables(db *DB) error {
 	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS accounts (
-					   id INTEGER AUTO_INCREMENT,
+					   id INT AUTO_INCREMENT,
 					   handle TEXT,
 					   password TEXT,
 					   
@@ -58,17 +58,23 @@ func CreateTables(db *DB) error {
 		return err 
 	}
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS tests (
-					  id INTEGER AUTO_INCREMENT,
+					  id INT AUTO_INCREMENT,
 					  name TEXT,
+					  start BIGINT,
+					  end BIGINT,
+
 					  PRIMARY KEY (id)
 					  )`)
 	if err != nil {
 		return err
 	}
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS questions (
-					  id INTEGER AUTO_INCREMENT,
+					  id INT AUTO_INCREMENT,
 					  content TEXT,
-					  PRIMARY KEY (id)
+					  idt INT,
+					  
+					  PRIMARY KEY (id),
+					  FOREIGN KEY (idt) REFERENCES tests(id)
 					  )`)
 	if err != nil {
 		return err
@@ -94,12 +100,17 @@ func ResetTables(db *DB) error {
 		return err
 	}
 
+	_, err = db.Exec("DROP TABLE IF EXISTS choices")
+	if err != nil {
+		return err
+	}
+
 	_, err = db.Exec("DROP TABLE IF EXISTS questions")
 	if err != nil {
 		return err
 	}
 
-	_, err = db.Exec("DROP TABLE IF EXISTS answers")
+	_, err = db.Exec("DROP TABLE IF EXISTS tests")
 	if err != nil {
 		return err
 	}

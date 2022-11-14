@@ -1,9 +1,6 @@
 package question
 
 import (
-	"net/http"
-
-	"github.com/labstack/echo/v4"
 	"github.com/trxbach/TOI-YEU-GO/choice"
 	"github.com/trxbach/TOI-YEU-GO/database"
 )
@@ -11,12 +8,12 @@ import (
 type Question struct {
 	Id int `json:"id"`
 	Content string `json:"content"`
+	Idt int `json:"idt"`
 	Choices []choice.Choice `json:"choices"`
-	Idt int
 }
 
 func InsertQuestionSql(db *database.DB, Q *Question) error {
-	res, err := db.Exec("INSERT INTO questions (content) VALUES (?)", Q.Content)
+	res, err := db.Exec("INSERT INTO questions (content, idt) VALUES (?, ?)", Q.Content, Q.Idt)
 	if err != nil {
 		return err
 	}
@@ -36,13 +33,13 @@ func InsertQuestionSql(db *database.DB, Q *Question) error {
 	return nil
 }
 
-func (wrp *Wrapper) AddQuestion(c echo.Context) error {
-	var Q Question
-	if err := c.Bind(&Q); err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
-	}
-	if err := InsertQuestionSql(wrp.db, &Q); err != nil {
-		return c.String(http.StatusBadRequest, err.Error())
-	}
-	return c.JSON(http.StatusOK, Q)
-}
+// func (wrp *Wrapper) AddQuestion(c echo.Context) error {
+// 	var Q Question
+// 	if err := c.Bind(&Q); err != nil {
+// 		return c.String(http.StatusBadRequest, err.Error())
+// 	}
+// 	if err := InsertQuestionSql(wrp.db, &Q); err != nil {
+// 		return c.String(http.StatusBadRequest, err.Error())
+// 	}
+// 	return c.JSON(http.StatusOK, Q)
+// }

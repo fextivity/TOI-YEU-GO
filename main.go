@@ -9,7 +9,7 @@ import (
 	"github.com/trxbach/TOI-YEU-GO/admin"
 	"github.com/trxbach/TOI-YEU-GO/database"
 	"github.com/trxbach/TOI-YEU-GO/helper"
-	"github.com/trxbach/TOI-YEU-GO/question"
+	"github.com/trxbach/TOI-YEU-GO/test"
 )
 
 func main() {
@@ -28,8 +28,8 @@ func main() {
 	e := echo.New()
 	admin.New(e, db)
 	// answer.New(e, db)
-	question.New(e, db)
-	// test.New(e, db)
+	// question.New(e, db)
+	test.New(e, db)
 
 	log.Fatal(e.Start(":1323"))
 }

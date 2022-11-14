@@ -10,12 +10,14 @@ import (
 
 type Test struct{
 	Id int `json:"id"`
-	Content string `json:"content"`
+	Name string `json:"name"`
+	StartTime int64 `json:"start"`
+	EndTime int64 `json:"end"`
 	Questions []question.Question `json:"questions"`
 }
 
 func InsertTestSql(db *database.DB, T *Test) error {
-	res, err := db.Exec("INSERT INTO tests (content) VALUES (?)", T.Content)
+	res, err := db.Exec("INSERT INTO tests (name, start, end) VALUES (?, ?, ?)", T.Name, T.StartTime, T.EndTime)
 	if err != nil {
 		return err
 	}

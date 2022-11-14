@@ -7,7 +7,7 @@ import (
 type Choice struct {
 	Id int `json:"id"`
 	Content string `json:"content"`
-	Idq int
+	Idq int `json:"idq"`
 }
 
 func InsertAnswerSql(db *database.DB, C *Choice) error {

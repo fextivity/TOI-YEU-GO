@@ -4,62 +4,60 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/trxbach/TOI-YEU-GO/choice"
 	"github.com/trxbach/TOI-YEU-GO/database"
-	"github.com/trxbach/TOI-YEU-GO/helper"
+	"github.com/trxbach/TOI-YEU-GO/question"
+	"github.com/trxbach/TOI-YEU-GO/test"
 )
 
 func (wrp *Wrapper) ResetDatabase(c echo.Context) error {
 	err := database.ResetTables(wrp.db)
 	if err != nil {
-		return err
+		return c.String(http.StatusBadRequest, err.Error())
 	}
 	return c.String(http.StatusOK, "Reset database\n")
 }
 
-func (wrp *Wrapper) DeleteAllQuestions(c echo.Context) error {
+func (wrp *Wrapper) AllTests(c echo.Context) error {
 	db := wrp.db
-	_, err := db.Query("DELETE FROM questions")
-	helper.FatalOnErr(err)
-	return c.String(http.StatusOK, "Deleted questions\n")
-}
-
-func (wrp *Wrapper) DeleteAllAnswers(c echo.Context) error {
-	db := wrp.db
-	_, err := db.Query("DELETE FROM answers")
-	helper.FatalOnErr(err)
-	return c.String(http.StatusOK, "Deleted answers\n")
-}
-
-func (wrp *Wrapper) AllQuestions(c echo.Context) error {
-	type answer struct {
-		Id int `json:"id"`
-		Content string `json:"content"`
+	rows, err := db.Query(`SELECT t.id, t.name, t.start, t.end, q.id, q.content, c.id, c.content
+						  FROM tests AS t
+						  LEFT JOIN questions AS q ON t.id = q.idt
+						  LEFT JOIN choices AS c ON q.id = c.idq
+						  ORDER BY t.id, q.id, c.id`)
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
 	}
-	type question struct {
-		Id int `json:"id"`
-		Content string `json:"content"`
-		Choices []answer `json:"choices"`
-	}
-	db := wrp.db
-	rows, err := db.Query("SELECT q.id, a.id, q.content, a.content FROM questions AS q LEFT JOIN answers AS a ON q.id = a.idq ORDER BY q.id")
-	helper.FatalOnErr(err)
 	defer rows.Close()
 
-	var questions []question
-	setQuestion := make(map[int]struct{})
-	var void struct{}
+	arrTest := []test.Test{}
 	for rows.Next() {
-		var idq, ida int
-		var cq, ca string
-		err := rows.Scan(&idq, &ida, &cq, &ca)
-		helper.FatalOnErr(err)
-
-		if _, exist := setQuestion[idq]; !exist {
-			setQuestion[idq] = void
-			questions = append(questions, question{Id: idq, Content: cq, Choices: []answer{}})
+		var (
+			idt int
+			t_name string
+			t_start int64
+			t_end int64
+			idq int
+			q_content string
+			idc int
+			c_content string
+		)
+		err := rows.Scan(&idt, &t_name, &t_start, &t_end, &idq, &q_content, &idc, &c_content)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
 		}
-		choices := &questions[len(questions) - 1].Choices
-		*choices = append(*choices, answer{Id: ida, Content: ca})
+
+		if len(arrTest) == 0 || arrTest[len(arrTest) - 1].Id != idt {
+			arrTest = append(arrTest, test.Test{Id: idt, Name: t_name, StartTime: t_start, EndTime: t_end})
+		}
+		arrQuestion := &arrTest[len(arrTest) - 1].Questions
+		if len(*arrQuestion) == 0 || (*arrQuestion)[len(*arrQuestion) - 1].Id != idq {
+			*arrQuestion = append(*arrQuestion, question.Question{Id: idq, Content: q_content, Idt: idt})
+		}
+		arrChoice := &((*arrQuestion)[len(*arrQuestion) - 1].Choices)
+		if len(*arrChoice) == 0 || (*arrChoice)[len(*arrChoice) - 1].Id != idq {
+			*arrChoice = append(*arrChoice, choice.Choice{Id: idc, Content: c_content, Idq: idq})
+		}
 	}
-	return c.JSON(http.StatusOK, questions)
+	return c.JSON(http.StatusOK, arrTest)
 }
