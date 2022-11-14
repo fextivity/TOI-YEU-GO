@@ -1,0 +1,15 @@
+name: Deploy app to Fly.io
+on:
+    push:
+jobs:
+    deploy:
+        name: 🚀 Deploy app on Fly.io
+        runs-on: ubuntu-latest
+        env:
+            FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        steps:
+            - name: ⬇️ Checkout repo
+              uses: actions/checkout@v3
+            - uses: superfly/flyctl-actions/setup-flyctl@master
+            - name: 🚀 Deploy app
+              run: flyctl deploy --remote-only
