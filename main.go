@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 
 	"github.com/trxbach/TOI-YEU-GO/admin"
@@ -14,8 +13,7 @@ import (
 
 func main() {
 	// Load dotenv file
-	err := godotenv.Load("default.env")
-	helper.FatalOnErr(err)
+	// godotenv.Load("default.env")
 
 	// Get pointer to database
 	db, err := database.New(nil)
