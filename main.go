@@ -1,10 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"strconv"
 
+	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-
 	"github.com/trxbach/TOI-YEU-GO/admin"
 	"github.com/trxbach/TOI-YEU-GO/database"
 	"github.com/trxbach/TOI-YEU-GO/helper"
@@ -13,7 +16,7 @@ import (
 
 func main() {
 	// Load dotenv file
-	// godotenv.Load("default.env")
+	godotenv.Load("default.env")
 
 	// Get pointer to database
 	db, err := database.New(nil)
@@ -28,6 +31,9 @@ func main() {
 	// answer.New(e, db)
 	// question.New(e, db)
 	test.New(e, db)
-
-	log.Fatal(e.Start(":1323"))
+	port, port_err := strconv.Atoi(os.Getenv("PORT"))
+	if &port == nil || port_err != nil {
+		port = 1323
+	}
+	log.Fatal(e.Start(fmt.Sprintf(":%d", port)))
 }
