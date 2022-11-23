@@ -23,9 +23,6 @@ func main() {
 	helper.FatalOnErr(err)
 	defer db.Close()
 
-	err = database.CreateTables(db)
-	helper.FatalOnErr(err)
-
 	e := echo.New()
 	admin.New(e, db)
 	// answer.New(e, db)

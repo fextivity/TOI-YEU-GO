@@ -70,10 +70,8 @@ func CreateTables(db *DB) error {
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS choices (
 					  id INT AUTO_INCREMENT,
 					  content TEXT,
-					  is_answer BOOLEAN,
-
 					  idq INT,
-
+					  is_answer BOOLEAN,
 					  PRIMARY KEY (id)
 					  )`)
 	if err != nil {
