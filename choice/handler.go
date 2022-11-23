@@ -7,11 +7,12 @@ import (
 type Choice struct {
 	Id int `json:"id"`
 	Content string `json:"content"`
+	IsAnswer bool `json:"is_answer"`
 	Idq int `json:"idq"`
 }
 
 func InsertAnswerSql(db *database.DB, C *Choice) error {
-	res, err := db.Exec("INSERT INTO choices (content, idq) VALUES (?, ?)", C.Content, C.Idq)
+	res, err := db.Exec(`INSERT INTO choices (content, is_answer, idq) VALUES (?, ?, ?)`, C.Content, C.IsAnswer, C.Idq)
 	if err != nil {
 		return err
 	}
@@ -20,5 +21,13 @@ func InsertAnswerSql(db *database.DB, C *Choice) error {
 		return err
 	}
 	C.Id = int(id)
+	return nil
+}
+
+func DeleteChoiceSQL(db *database.DB, id int) error {
+	_, err := db.Exec(`DELETE FROM questions WHERE id = ?`, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }

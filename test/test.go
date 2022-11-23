@@ -14,4 +14,5 @@ func New(e *echo.Echo, db *database.DB) {
 		db: db,
 	}
 	e.POST("/api/test/add", wrp.AddTest)
+	e.POST("/api/test/delete", wrp.DeleteTest)
 }

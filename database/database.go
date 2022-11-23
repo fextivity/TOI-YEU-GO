@@ -2,8 +2,9 @@ package database
 
 import (
 	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type DB struct {
@@ -13,7 +14,7 @@ type DB struct {
 func New(connection *string) (*DB, error) {
 	default_conn := os.Getenv("DB_DSN")
 	if connection == nil {
-		if &default_conn == nil {
+		if default_conn == "" {
 			return nil, nil
 		}
 		connection = &default_conn
@@ -41,6 +42,7 @@ func CreateTables(db *DB) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS tests (
 					  id INT AUTO_INCREMENT,
 					  name TEXT,
@@ -52,9 +54,11 @@ func CreateTables(db *DB) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS questions (
 					  id INT AUTO_INCREMENT,
 					  content TEXT,
+					  
 					  idt INT,
 					  
 					  PRIMARY KEY (id)
@@ -62,9 +66,12 @@ func CreateTables(db *DB) error {
 	if err != nil {
 		return err
 	}
+
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS choices (
 					  id INT AUTO_INCREMENT,
 					  content TEXT,
+					  is_answer BOOLEAN,
+
 					  idq INT,
 
 					  PRIMARY KEY (id)
