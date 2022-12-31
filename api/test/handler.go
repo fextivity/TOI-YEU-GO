@@ -2,7 +2,9 @@ package test
 
 import (
 	"database/sql"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -38,6 +40,17 @@ func InsertTestSql(db *database.DB, T *Test) error {
 			return err
 		}
 	}
+	client := http.Client{}
+	revalidateURL := fmt.Sprintf("%s/api/internal/revalidate_exam?secret=%s&examId=%d", os.Getenv("FRONTEND_ADDR"), os.Getenv("FRONTEND_API_TOKEN"), T.Id)
+	revalidateReq, err := http.NewRequest("GET", revalidateURL, nil)
+	if err != nil {
+		return err
+	}
+	revalidateRes, err := client.Do(revalidateReq)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Added test and revalidated frontend successfully. Status code: %d\n", revalidateRes.StatusCode)
 	return nil
 }
 
@@ -107,8 +120,8 @@ func (wrp *Wrapper) GetATest(c echo.Context) error {
 		c_content  sql.NullString
 		c_isanswer sql.NullBool
 	)
-
 	var test Test
+
 	if !omit_questions {
 		rows, err := db.Query(`SELECT t.id, t.name, t.start, t.end, q.id, q.content, c.id, c.content, c.is_answer
 						FROM tests AS t 
