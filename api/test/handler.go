@@ -12,11 +12,12 @@ import (
 )
 
 type Test struct {
-	Id        int                 `json:"id"`
-	Name      string              `json:"name"`
-	StartTime int64               `json:"start"`
-	EndTime   int64               `json:"end"`
-	Questions []question.Question `json:"questions"`
+	Id        int    `json:"id"`
+	Name      string `json:"name"`
+	StartTime int64  `json:"start"`
+	EndTime   int64  `json:"end"`
+	// sometimes we intentionally leave this out, for example when we only need the test's info
+	Questions []question.Question `json:"questions,omitempty"`
 }
 
 func InsertTestSql(db *database.DB, T *Test) error {
@@ -90,6 +91,68 @@ func (wrp *Wrapper) DeleteTest(c echo.Context) error {
 		return c.String(http.StatusBadRequest, err.Error())
 	}
 	return c.String(http.StatusOK, "deleted")
+}
+
+func (wrp *Wrapper) GetATest(c echo.Context) error {
+	db := wrp.db
+	id := c.QueryParam("id")
+	omit_questions, err := strconv.ParseBool(c.QueryParam("omit_questions"))
+	if err != nil {
+		omit_questions = false
+	}
+	var (
+		idq        sql.NullInt32
+		q_content  sql.NullString
+		idc        sql.NullInt32
+		c_content  sql.NullString
+		c_isanswer sql.NullBool
+	)
+
+	var test Test
+	if !omit_questions {
+		rows, err := db.Query(`SELECT t.id, t.name, t.start, t.end, q.id, q.content, c.id, c.content, c.is_answer
+						FROM tests AS t 
+						LEFT JOIN questions AS q ON t.id = q.idt
+						LEFT JOIN choices AS c ON q.id = c.idq
+						WHERE t.id = ?
+						ORDER BY t.id, q.id, c.id`, id)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		for rows.Next() {
+			err := rows.Scan(&test.Id, &test.Name, &test.StartTime, &test.EndTime, &idq, &q_content, &idc, &c_content, &c_isanswer)
+			if err != nil {
+				return c.String(http.StatusInternalServerError, err.Error())
+			}
+			if !idq.Valid {
+				continue
+			}
+			arrQuestion := &test.Questions
+			if len(*arrQuestion) == 0 || (*arrQuestion)[len(*arrQuestion)-1].Id != int(idq.Int32) {
+				*arrQuestion = append(*arrQuestion, question.Question{Id: int(idq.Int32), Content: q_content.String, Idt: test.Id})
+			}
+			if !idc.Valid {
+				continue
+			}
+			arrChoice := &((*arrQuestion)[len(*arrQuestion)-1].Choices)
+			if len(*arrChoice) == 0 || (*arrChoice)[len(*arrChoice)-1].Id != int(idc.Int32) {
+				*arrChoice = append(*arrChoice, choice.Choice{Id: int(idc.Int32), Content: c_content.String, IsAnswer: c_isanswer.Bool, Idq: int(idq.Int32)})
+			}
+		}
+		return c.JSON(http.StatusOK, test)
+	}
+	row := db.QueryRow(`SELECT t.id, t.name, t.start, t.end
+							FROM tests AS t 
+							WHERE t.id = ?`, id)
+	switch err := row.Scan(&test.Id, &test.Name, &test.StartTime, &test.EndTime); err {
+	case sql.ErrNoRows:
+		return c.JSON(http.StatusNotFound, "Test not found.")
+	case nil:
+		break
+	default:
+		return c.JSON(http.StatusInternalServerError, "Internal server error.")
+	}
+	return c.JSON(http.StatusOK, test)
 }
 
 func (wrp *Wrapper) AllTests(c echo.Context) error {
