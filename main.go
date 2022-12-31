@@ -8,10 +8,10 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
-	"github.com/trxbach/TOI-YEU-GO/admin"
+	"github.com/trxbach/TOI-YEU-GO/api/admin"
 	"github.com/trxbach/TOI-YEU-GO/database"
 	"github.com/trxbach/TOI-YEU-GO/helper"
-	"github.com/trxbach/TOI-YEU-GO/test"
+	"github.com/trxbach/TOI-YEU-GO/api/test"
 )
 
 func main() {

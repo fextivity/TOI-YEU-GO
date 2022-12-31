@@ -14,5 +14,4 @@ func New(e *echo.Echo, db *database.DB) {
 		db: db,
 	}
 	e.GET("/api/admin/reset_database", wrp.ResetDatabase)
-	e.GET("/api/admin/all", wrp.AllTests)
 }
