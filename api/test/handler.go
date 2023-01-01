@@ -50,7 +50,11 @@ func InsertTestSql(db *database.DB, T *Test) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Added test and revalidated frontend successfully. Status code: %d\n", revalidateRes.StatusCode)
+	if revalidateRes.StatusCode == 200 {
+		fmt.Printf("Added test and revalidated the frontend successfully.\n")
+	} else {
+		fmt.Printf("An error occurred while revalidating the frontend. Status code: %d. Please check the frontend's log.\n", revalidateRes.StatusCode)
+	}
 	return nil
 }
 
