@@ -1,23 +1,27 @@
 API:
 - `/api/test/add`: Add a test with format:
 
-```
+```json
 {
-    "name": "Among us quiz" // Name of the test
-    "start": 1668006000 // Start time, in unix time
-    "end": 1668009600 // End time, in unix time
+    "name": "Among us quiz",
+    "start": 1668006000, // Unix time
+    "end": 1668009600, // Unix time
     "questions": [
         {
-            "content": "Is red sus?" // Content of the question
+            "content": "Is red sus?",
             "choices": [
                 {
-                    "content": "Yes" // Content of the choice
+                    "content": "Yes",
+                    "is_answer": true,
                 },
                 {
-                    "content": "No" 
+                    "content": "No",
+                    "is_answer": false,
                 }
             ]
         },
     ]
 }
 ```
+
+- `/api/test/delete`: Delete a test with given id

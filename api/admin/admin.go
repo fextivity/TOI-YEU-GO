@@ -13,5 +13,5 @@ func New(e *echo.Echo, db *database.DB) {
 	wrp := &Wrapper{
 		db: db,
 	}
-	e.GET("/api/admin/reset_database", wrp.ResetDatabase)
+	e.POST("/api/admin/reset_database", wrp.ResetDatabase)
 }
