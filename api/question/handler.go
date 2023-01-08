@@ -1,7 +1,7 @@
 package question
 
 import (
-	"github.com/trxbach/TOI-YEU-GO/choice"
+	"github.com/trxbach/TOI-YEU-GO/api/choice"
 	"github.com/trxbach/TOI-YEU-GO/database"
 )
 

@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/trxbach/TOI-YEU-GO/api/choice"
 	"github.com/trxbach/TOI-YEU-GO/api/question"
-	"github.com/trxbach/TOI-YEU-GO/choice"
 	"github.com/trxbach/TOI-YEU-GO/database"
 )
 
@@ -170,6 +170,56 @@ func (wrp *Wrapper) GetATest(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "Internal server error.")
 	}
 	return c.JSON(http.StatusOK, test)
+}
+
+type AnswerQ struct {
+	Idq int `json:"idq"`
+	Idc int `json:"idc"`
+}
+type AnswerT struct {
+	Answers []AnswerQ `json:"answers"`
+}
+
+func (wrp *Wrapper) JudgeTest(c echo.Context) error {
+	db := wrp.db
+	id := c.QueryParam("id")
+	var A AnswerT
+	if err := c.Bind(&A); err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	indexQuestion := make(map[int]int)
+	for _, answerq := range A.Answers {
+		indexQuestion[answerq.Idq] = answerq.Idc
+	}
+
+	rows, err := db.Query(`SELECT q.id, c.id
+						   FROM tests AS t
+						   LEFT JOIN questions AS q ON t.id = q.idt
+						   LEFT JOIN choices AS c ON q.id = c.idq
+						   WHERE t.id = ? AND c.is_answer = TRUE`, id)
+	
+	if err != nil {
+		return c.String(http.StatusBadRequest, err.Error())
+	}
+
+	correct := 0
+	for rows.Next() {
+		var idq int
+		var idc int
+		err := rows.Scan(&idq, &idc)
+		if err != nil {
+			return c.String(http.StatusBadRequest, err.Error())
+		}
+
+		if answeridc, ok := indexQuestion[idq]; ok {
+			if answeridc == idc {
+				correct++
+			}
+		}
+	}
+
+	return c.String(http.StatusOK, strconv.Itoa(correct))
 }
 
 func (wrp *Wrapper) AllTests(c echo.Context) error {
