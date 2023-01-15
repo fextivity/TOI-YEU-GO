@@ -1,36 +1,30 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"net/http"
 	"os"
-	"strconv"
 
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/joho/godotenv"
-	"github.com/labstack/echo/v4"
-	"github.com/trxbach/TOI-YEU-GO/api/admin"
-	"github.com/trxbach/TOI-YEU-GO/database"
-	"github.com/trxbach/TOI-YEU-GO/helper"
-	"github.com/trxbach/TOI-YEU-GO/api/test"
+	"github.com/trxbach/TOI-YEU-GO/graph"
 )
 
+const defaultPort = "8080"
+
 func main() {
-	// Load dotenv file
 	godotenv.Load("default.env")
-
-	// Get pointer to database
-	db, err := database.New(nil)
-	helper.FatalOnErr(err)
-	defer db.Close()
-
-	e := echo.New()
-	admin.New(e, db)
-	// answer.New(e, db)
-	// question.New(e, db)
-	test.New(e, db)
-	port, port_err := strconv.Atoi(os.Getenv("PORT"))
-	if &port == nil || port_err != nil {
-		port = 1323
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
 	}
-	log.Fatal(e.Start(fmt.Sprintf(":%d", port)))
+
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
+
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
