@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -14,6 +15,11 @@ import (
 const defaultPort = "1323"
 
 func main() {
+	isProd, err := strconv.ParseBool(os.Getenv("PROD"))
+	if err != nil {
+		isProd = false
+	}
+
 	godotenv.Load("default.env")
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -22,7 +28,10 @@ func main() {
 
 	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	if !isProd {
+		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	}
+	
 	http.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
