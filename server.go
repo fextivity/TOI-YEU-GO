@@ -11,7 +11,7 @@ import (
 	"github.com/trxbach/TOI-YEU-GO/graph"
 )
 
-const defaultPort = "8080"
+const defaultPort = "1323"
 
 func main() {
 	godotenv.Load("default.env")

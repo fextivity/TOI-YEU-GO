@@ -6,7 +6,8 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o toiyeugo
+RUN go generate ./...
+RUN go build -o toiyeugo server.go
 
 FROM alpine:latest AS runtime
 WORKDIR /app
